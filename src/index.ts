@@ -27,9 +27,10 @@ client.on('message', async (msg) => {
       const res = `AMPutated links:\n${links.join('\n')}\n\nDone in: ${Math.abs(Date.now() - msg.createdTimestamp)}ms.`;
       msg.channel.send(res);
       msg.suppressEmbeds();
-    }, () => {
+    }, (err: any) => {
       const now = Date.now();
       msg.channel.send(`Something went wrong!! Error ID: ${now}`);
+      console.log(err);
     });
   });
 });
