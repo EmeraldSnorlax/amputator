@@ -8,7 +8,7 @@ const options: RequestInit = {
   redirect: 'manual',
 };
 
-export const ampRegex = /((\/|\.|\?|=|&|%|_)amp)|(amp(\/|\.|\?|=|&|%|_))/i;
+export const ampRegex = /((\/|\.|\?|=|&|%|_|-)amp)|(amp(\/|\.|\?|=|&|%|_|-))/i;
 
 /*
 Takes an array of links as an argument, and checks if they contain AMP links.
@@ -16,8 +16,13 @@ If the link is an AMP link, it follows it and gives back the de-AMP'd link.
 If the link is not an AMP link, it ignores it.
 */
 
-function resolve(links: string[] | RegExpMatchArray, cb: Function): void {
+function resolve(
+  links: string[] | RegExpMatchArray,
+  done: Function,
+  failure: Function,
+): void {
   let deamped: string[] = [];
+  let processed = 1;
   links.forEach((link) => {
     if (!link.match(ampRegex)) return;
     fetch(link, options)
@@ -26,7 +31,9 @@ function resolve(links: string[] | RegExpMatchArray, cb: Function): void {
         const canonical = parse(res).querySelector('link[rel="canonical"]');
         if (!canonical) return;
         deamped = [...deamped, canonical.attributes.href];
-        cb(deamped);
+        if (processed === links.length) { done(deamped); } else { processed += 1; }
+      }).catch((err) => {
+        failure(err);
       });
   });
 }

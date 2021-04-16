@@ -9,6 +9,7 @@ client.login(process.env.TOKEN as string);
 
 client.on('ready', () => {
   if (client.user) console.log(`Logged in: ${client.user.tag}`);
+  client.user?.setPresence({ activity: { type: 'WATCHING', name: 'for AMP links' } });
 });
 
 client.on('message', async (msg) => {
@@ -21,14 +22,14 @@ client.on('message', async (msg) => {
   const extractedUrls = msg.content.match(/(?:(?:https?):\/\/|www\.)(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[A-Z0-9+&@#/%=~_|$])/igm);
   if (!extractedUrls) return;
 
-  msg.channel.send('AMPutating links...').then((output) => {
+  msg.react('‼️').then(() => {
     resolve(extractedUrls, (links: string[]) => {
-      const res = `
-AMPutated links:\n${links.join('\n')}\n\n
-Done in: ${Math.abs(Date.now() - msg.createdTimestamp)}ms.
-      `;
-      output.edit(res);
+      const res = `AMPutated links:\n${links.join('\n')}\n\nDone in: ${Math.abs(Date.now() - msg.createdTimestamp)}ms.`;
+      msg.channel.send(res);
       msg.suppressEmbeds();
+    }, () => {
+      const now = Date.now();
+      msg.channel.send(`Something went wrong!! Error ID: ${now}`);
     });
   });
 });
