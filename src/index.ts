@@ -1,11 +1,10 @@
 import * as Discord from 'discord.js';
-import dotenv from 'dotenv';
 import resolve, { ampRegex } from './resolver';
 
-dotenv.config();
+import TOKEN from './config';
 
 const client = new Discord.Client();
-client.login(process.env.TOKEN as string);
+client.login(TOKEN);
 
 client.on('ready', () => {
   if (client.user) console.log(`Logged in: ${client.user.tag}`);
