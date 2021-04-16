@@ -29,6 +29,7 @@ client.on('message', async (msg) => {
     }, (err: any) => {
       const now = Date.now();
       msg.channel.send(`Something went wrong!! Error ID: ${now}`);
+      console.log(now)
       console.log(err);
     });
   });
