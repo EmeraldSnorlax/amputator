@@ -56,6 +56,12 @@ client.on('message', async (msg) => {
 client.on('guildCreate', (guild) => {
   try {
     guild.systemChannel?.send(embed);
+  } catch {
+    try {
+      guild.owner?.send('I failed to send a message, do I have the right perms in your server?');
+    } catch {
+      console.log('Failed to send the failure message');
+    }
   } finally {
     console.log(`Now in: ${client.guilds.cache.size} guilds!`);
   }
