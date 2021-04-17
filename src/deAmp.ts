@@ -24,13 +24,16 @@ function deAmp(
     links.forEach((link, i) => {
       if (!link.match(ampRegex)) return;
       fetch(link, options)
-        .then((res) => res.text())
         .then((res) => {
+          if (!res.ok) { throw new Error(`${link}: ${res.status}`); } else { res.text(); }
+        })
+        .then((res: any) => {
           const canonical = parse(res).querySelector('link[rel="canonical"]');
           if (!canonical) return;
           deamped = [...deamped, canonical.attributes.href];
           if (i === links.length - 1) { resolve(deamped); }
-        }).catch((err) => {
+        })
+        .catch((err) => {
           reject(err);
         });
     });

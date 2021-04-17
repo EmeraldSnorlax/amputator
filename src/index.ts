@@ -29,7 +29,15 @@ client.on('message', async (msg) => {
       msg.channel.send(res);
       msg.suppressEmbeds();
     }).catch((err) => {
-      msg.channel.send(`Something went wrong!!\n\`\`\`${err}\`\`\``);
+      msg.channel.send(`Something went wrong!!\n\`\`\`${err}\`\`\``)
+        .then((m) => {
+          m.react('🗑️')
+            .then(() => {
+              const filter = (reaction: Discord.MessageReaction) => reaction.emoji.name === '🗑️';
+              const collector = m.createReactionCollector(filter, { time: 2 * 60 * 1000 });
+              collector.on('collect', () => { m.delete(); });
+            });
+        });
     });
 });
 
