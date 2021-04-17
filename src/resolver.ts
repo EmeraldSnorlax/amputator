@@ -8,7 +8,7 @@ const options: RequestInit = {
   redirect: 'manual',
 };
 
-export const ampRegex = /((\/|\.|\?|=|&|%|_|-)amp)|(amp(\/|\.|\?|=|&|%|_|-))/i;
+export const ampRegex = /(\/|\.|\?|=|&|%|_|-)amp\b/i;
 
 /*
 Takes an array of links as an argument, and checks if they contain AMP links.
