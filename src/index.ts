@@ -15,35 +15,42 @@ client.on('ready', () => {
 client.on('message', async (msg) => {
   if (msg.author.bot) return;
 
-  // More info about the bot
-  if (msg.mentions.has(client.user as Discord.User)) {
-    msg.channel.send(embed);
+  try {
+    if (msg.mentions.has(client.user as Discord.User)) {
+      msg.channel.send(embed);
+    }
+
+    // Check if the message might contain an AMP link before doing anything else
+    if (!msg.content.match(ampRegex)) return;
+
+    // Then actually check for links
+    const extractedUrls = msg.content.match(/(?:(?:https?):\/\/|www\.)(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[A-Z0-9+&@#/%=~_|$])/igm);
+    if (!extractedUrls) return;
+
+    msg.react('‼️');
+    deAmp(extractedUrls)
+      .then((links) => {
+        const res = `AMPutated links:\n${links.join('\n')}\n\nDone in: ${Math.abs(Date.now() - msg.createdTimestamp)}ms.`;
+        msg.channel.send(res);
+        msg.suppressEmbeds();
+      }).catch((err) => {
+        msg.channel.send(`Something went wrong!!\n\`\`\`${err}\`\`\``)
+          .then((m) => {
+            m.react('🗑️')
+              .then(() => {
+                const filter = (reaction: Discord.MessageReaction) => reaction.emoji.name === '🗑️';
+                const collector = m.createReactionCollector(filter, { time: 2 * 60 * 1000 });
+                collector.on('collect', () => { m.delete(); });
+              });
+          });
+      });
+  } catch {
+    try {
+      msg.guild?.owner?.send('I failed to send a message, do I have the right perms in your server?');
+    } catch {
+      console.log('Failed to send the failure message');
+    }
   }
-
-  // Check if the message might contain an AMP link before doing anything else
-  if (!msg.content.match(ampRegex)) return;
-
-  // Then actually check for links
-  const extractedUrls = msg.content.match(/(?:(?:https?):\/\/|www\.)(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[A-Z0-9+&@#/%=~_|$])/igm);
-  if (!extractedUrls) return;
-
-  msg.react('‼️');
-  deAmp(extractedUrls)
-    .then((links) => {
-      const res = `AMPutated links:\n${links.join('\n')}\n\nDone in: ${Math.abs(Date.now() - msg.createdTimestamp)}ms.`;
-      msg.channel.send(res);
-      msg.suppressEmbeds();
-    }).catch((err) => {
-      msg.channel.send(`Something went wrong!!\n\`\`\`${err}\`\`\``)
-        .then((m) => {
-          m.react('🗑️')
-            .then(() => {
-              const filter = (reaction: Discord.MessageReaction) => reaction.emoji.name === '🗑️';
-              const collector = m.createReactionCollector(filter, { time: 2 * 60 * 1000 });
-              collector.on('collect', () => { m.delete(); });
-            });
-        });
-    });
 });
 
 client.on('guildCreate', (guild) => {
