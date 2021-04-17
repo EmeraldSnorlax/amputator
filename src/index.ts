@@ -1,6 +1,6 @@
 import * as Discord from 'discord.js';
 import deAmp, { ampRegex } from './deAmp';
-import embed from './welcome';
+import embed from './info';
 
 import TOKEN from './config';
 
@@ -14,6 +14,11 @@ client.on('ready', () => {
 
 client.on('message', async (msg) => {
   if (msg.author.bot) return;
+
+  // More info about the bot
+  if (msg.mentions.has(client.user as Discord.User)) {
+    msg.channel.send(embed);
+  }
 
   // Check if the message might contain an AMP link before doing anything else
   if (!msg.content.match(ampRegex)) return;
