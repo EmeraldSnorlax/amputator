@@ -1,5 +1,6 @@
 import * as Discord from 'discord.js';
-import resolve, { ampRegex } from './resolver';
+import deAmp, { ampRegex } from './deAmp';
+import embed from './welcome';
 
 import TOKEN from './config';
 
@@ -21,18 +22,23 @@ client.on('message', async (msg) => {
   const extractedUrls = msg.content.match(/(?:(?:https?):\/\/|www\.)(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[A-Z0-9+&@#/%=~_|$])/igm);
   if (!extractedUrls) return;
 
-  msg.react('‼️').then(() => {
-    resolve(extractedUrls, (links: string[]) => {
+  msg.react('‼️');
+  deAmp(extractedUrls)
+    .then((links) => {
       const res = `AMPutated links:\n${links.join('\n')}\n\nDone in: ${Math.abs(Date.now() - msg.createdTimestamp)}ms.`;
       msg.channel.send(res);
       msg.suppressEmbeds();
-    }, (err: any) => {
-      const now = Date.now();
-      msg.channel.send(`Something went wrong!! Error ID: ${now}`);
-      console.log(now);
-      console.log(err);
+    }).catch((err) => {
+      msg.channel.send(`Something went wrong!! Error ID: \`\`\`${err}\`\`\``);
     });
-  });
+});
+
+client.on('guildCreate', (guild) => {
+  try {
+    guild.systemChannel?.send(embed);
+  } finally {
+    console.log(`Now in: ${client.guilds.cache.size} guilds!`);
+  }
 });
 
 export default client;
