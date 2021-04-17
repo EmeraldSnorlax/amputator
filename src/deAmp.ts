@@ -12,7 +12,7 @@ export const ampRegex = /(\/|\.|\?|=|&|%|_|-)amp\b/i;
 
 /*
 Takes an array of links as an argument, and checks if they contain AMP links.
-If the link is an AMP link, it follows it and gives back the de-AMP'd link.
+If the link is an AMP link, it follows it puts the de-AMP'd link into a promise array.
 If the link is not an AMP link, it ignores it.
 */
 
