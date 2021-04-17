@@ -8,6 +8,7 @@ No more AMP links in your discord chat
 > [Privacy + Terms for hosted bot](https://github.com/EmeraldSnorlax/amputator/blob/main/PRIVACY.md)
 > 
 > Please self-host if you can!
+> If this bot reaches 100 guilds, I **will not** verify it, as I don't particularly want Discord to have my ID.
 
 ---
 
