@@ -29,7 +29,7 @@ client.on('message', async (msg) => {
       msg.channel.send(res);
       msg.suppressEmbeds();
     }).catch((err) => {
-      msg.channel.send(`Something went wrong!! Error ID: \`\`\`${err}\`\`\``);
+      msg.channel.send(`Something went wrong!!\n\`\`\`${err}\`\`\``);
     });
 });
 
