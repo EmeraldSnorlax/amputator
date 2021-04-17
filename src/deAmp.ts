@@ -18,25 +18,27 @@ If the link is not an AMP link, it ignores it.
 
 function deAmp(
   links: string[] | RegExpMatchArray,
-): Promise<string[]> {
-  return new Promise((resolve, reject) => {
-    let deamped: string[] = [];
-    links.forEach((link, i) => {
-      if (!link.match(ampRegex)) return;
+): Promise<string>[] {
+  const deamped: Promise<string>[] = [];
+  links.forEach((link) => {
+    if (!link.match(ampRegex)) return;
+    const promise: Promise<string> = new Promise((resolve, reject) => {
       fetch(link, options)
         .then((res) => {
-          if (!res.ok) { throw new Error(`${link}: ${res.status}`); } else { res.text(); }
-        })
-        .then((res: any) => {
-          const canonical = parse(res).querySelector('link[rel="canonical"]');
-          if (!canonical) return;
-          deamped = [...deamped, canonical.attributes.href];
-          if (i === links.length - 1) { resolve(deamped); }
+          if (!res.ok) { throw new Error(`${link}: ${res.status}`); }
+          res.text()
+            .then((html: any) => {
+              const canonical = parse(html).querySelector('link[rel="canonical"]');
+              if (!canonical) return;
+              resolve(canonical.attributes.href);
+            });
         })
         .catch((err) => {
           reject(err);
         });
     });
+    deamped.push(promise);
   });
+  return deamped;
 }
 export default deAmp;

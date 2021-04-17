@@ -28,12 +28,13 @@ client.on('message', async (msg) => {
     if (!extractedUrls) return;
 
     msg.react('‼️');
-    deAmp(extractedUrls)
+    Promise.all(deAmp(extractedUrls))
       .then((links) => {
         const res = `AMPutated links:\n${links.join('\n')}\n\nDone in: ${Math.abs(Date.now() - msg.createdTimestamp)}ms.`;
         msg.channel.send(res);
         msg.suppressEmbeds();
-      }).catch((err) => {
+      })
+      .catch((err) => {
         msg.channel.send(`Something went wrong!!\n\`\`\`${err}\`\`\``)
           .then((m) => {
             m.react('🗑️')
