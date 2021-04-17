@@ -15,51 +15,49 @@ client.on('ready', () => {
 client.on('message', async (msg) => {
   if (msg.author.bot) return;
 
-  try {
-    if (msg.mentions.has(client.user as Discord.User)) {
-      msg.channel.send(embed);
-    }
-
-    // Check if the message might contain an AMP link before doing anything else
-    if (!msg.content.match(ampRegex)) return;
-
-    // Then actually check for links
-    const extractedUrls = msg.content.match(/(?:(?:https?):\/\/|www\.)(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[A-Z0-9+&@#/%=~_|$])/igm);
-    if (!extractedUrls) return;
-
-    msg.react('‼️');
-    Promise.all(deAmp(extractedUrls))
-      .then((links) => {
-        const res = `AMPutated links:\n${links.join('\n')}\n\nDone in: ${Math.abs(Date.now() - msg.createdTimestamp)}ms.`;
-        msg.channel.send(res);
-        msg.suppressEmbeds();
-      })
-      .catch((err) => {
-        msg.channel.send(`Something went wrong!!\n\`\`\`${err}\`\`\``)
-          .then((m) => {
-            m.react('🗑️')
-              .then(() => {
-                const filter = (reaction: Discord.MessageReaction) => reaction.emoji.name === '🗑️';
-                const collector = m.createReactionCollector(filter, { time: 2 * 60 * 1000 });
-                collector.on('collect', () => { m.delete(); });
-              });
-          });
-      });
-  } catch {
-    try {
-      msg.guild?.owner?.send('I failed to send a message, do I have the right perms in your server?');
-    } catch {
-      console.log('Failed to send the failure message');
-    }
+  if (msg.mentions.has(client.user as Discord.User)) {
+    msg.channel.send(embed)
+      .catch(() => {
+        msg.guild?.owner?.send(`I failed to send a message in <#${msg.channel}>, do I have the right perms in your server?`);
+      }).catch(() => {});
   }
+
+  // Check if the message might contain an AMP link before doing anything else
+  if (!msg.content.match(ampRegex)) return;
+
+  // Then actually check for links
+  const extractedUrls = msg.content.match(/(?:(?:https?):\/\/|www\.)(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[A-Z0-9+&@#/%=~_|$])/igm);
+  if (!extractedUrls) return;
+
+  msg.react('‼️')
+    .catch(() => {
+      msg.guild?.owner?.send(`I failed to react in <#${msg.channel}>, do I have the right perms in your server?`);
+    }).catch(() => {});
+
+  Promise.all(deAmp(extractedUrls))
+    .then((links) => {
+      const res = `AMPutated links:\n${links.join('\n')}\n\nDone in: ${Math.abs(Date.now() - msg.createdTimestamp)}ms.`;
+      msg.channel.send(res);
+      msg.suppressEmbeds();
+    })
+    .catch((err) => {
+      msg.channel.send(`Something went wrong!!\n\`\`\`${err}\`\`\``)
+        .then((m) => {
+          m.react('🗑️');
+          const filter = (reaction: Discord.MessageReaction) => reaction.emoji.name === '🗑️' && reaction.count! > 1;
+          const collector = m.createReactionCollector(filter, { time: 2 * 60 * 1000 });
+          collector.on('collect', () => { m.delete(); });
+        })
+        .catch(() => {
+          msg.guild?.owner?.send('I failed to send a message and/or react, do I have the right perms in your server?');
+        }).catch(() => {});
+    });
 });
 
 client.on('guildCreate', (guild) => {
-  try {
-    guild.systemChannel?.send(embed);
-  } finally {
-    console.log(`Now in: ${client.guilds.cache.size} guilds!`);
-  }
+  guild.systemChannel?.send(embed).catch(() => {
+    guild.owner?.send('I failed to send a message, do I have the right perms in your server?');
+  }).catch(() => {});
 });
 
 export default client;
