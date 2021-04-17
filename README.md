@@ -9,6 +9,8 @@ No more AMP links in your discord chat
 > 
 > Please self-host if you can!
 > If this bot reaches 100 guilds, I **will not** verify it, as I don't particularly want Discord to have my ID.
+>
+> I can be reached at `『EmeraldSnorlax』#8434`
 
 ---
 
